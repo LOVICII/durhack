@@ -12,3 +12,6 @@ We use this to colourize black and white images by calling deepai api. The image
 
 ## processing.py
 This program was used to enlarge and sharpen images, as well as remove noises and adjust contrast of the images.
+
+## nltk_class.py
+This program was used to extract keywords for each image, compare the similarity of the keywords betweeen images and find 4 most related images to each image. The output of this program is a json file containing information of the images including filename, relative, title and description. 
