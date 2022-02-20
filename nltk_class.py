@@ -1,5 +1,8 @@
 import nltk
 import pandas as pd
+import json
+import random
+
 
 # nltk.download('punkt')
 # nltk.download('averaged_perceptron_tagger')
@@ -100,7 +103,62 @@ photo_dict = get_keyword_dictionary(data)
 # count_dictionary(photo_dict)
 keywords = get_keyword_cloud(photo_dict)
 print("End initializing")
+
+random.seed(114514)
 for photo in photo_dict.keys():
     photo_dict[photo] = get_most_relative(photo, keywords, photo_dict)
+    index = int(photo[4:])
+    pre = photo[0:4]
+    while len(photo_dict[photo]) < 4:
+        photo_dict[photo].append(pre + str(random.randint(1, index)).zfill(4))
 
-print(photo_dict[0])
+print("Tag is over")
+
+# print(photo_dict)
+
+########################################
+dropped_data = data.drop_duplicates(subset=["comptitle"])
+dropped_data = dropped_data.reset_index()
+
+dataset_dict = {}
+for key in dropped_data.loc[:, "comptitle"]:
+    root_dict = {}
+    info_dict = {}
+    relative_dict = {}
+    raw_data = dropped_data.loc[dropped_data['comptitle'] == key]
+    raw_data = raw_data.reset_index()
+
+    root_dict["filename"] = raw_data.loc[0, "mediaurl"]
+
+    relative_dict["0"] = photo_dict[key][0]
+    relative_dict["1"] = photo_dict[key][1]
+    relative_dict["2"] = photo_dict[key][2]
+    relative_dict["3"] = photo_dict[key][3]
+    info_dict["relative"] = relative_dict
+
+    info_dict["description"] = raw_data.loc[0, "description"]
+    info_dict["title"] = raw_data.loc[0, "title"]
+    info_dict["location"] = raw_data.loc[0, "settlementarea"]
+    root_dict["info"] = info_dict
+
+    dataset_dict[key] = root_dict
+
+
+data = {"blac0001": {
+    "filename": "blac0001_tcm4-17374.jpg",
+    "info": {
+        "relative": {
+            "0": "sout0036",
+            "1": 'hord0043',
+            "2": 'seah0090',
+            "3": 'seah0173'
+        },
+        "description": "Photograph showing three children standing in front of a blanket suspended behind them; on the left is a boy, aged approximately six years, wearing an open-necked shirt, a jacket, long socks and dark shoes; on the right is a girl, aged approximately nine years, wearing a dark blazer with a light border, a pleated skirt, socks and button shoes; in front of the other two is a child, aged approximately four years, wearing a light-coloured dress, socks and sandals; they have been identified as being in Blackhall",
+        "title": "blac0001",
+        "location": "Blackhall",
+    }
+}}
+
+
+with open('data.json', 'w') as outfile:
+    json.dump(dataset_dict, outfile)
